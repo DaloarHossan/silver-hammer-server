@@ -1,5 +1,6 @@
 const express=require('express');
 const cors=require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 require('dotenv').config();
@@ -18,6 +19,7 @@ const run=async()=>{
   try {
 	await client.connect();
 	const productsCollection=client.db('Silver_Hammer').collection('products');
+	const usersCollection=client.db('Silver_Hammer').collection('users');
 	app.get('/products',async(req, res)=>{
 		const result =await productsCollection.find().toArray();
 		res.send(result);
@@ -27,6 +29,14 @@ const run=async()=>{
 		const query ={_id:ObjectId(id)}
 		const result = await productsCollection.findOne(query);
 		res.send(result);
+	})
+	app.put('/users/:email',async(req, res)=>{
+		const email=req.params.email;
+		const filter = { email: email };
+		const options = { upsert: true };
+		const result=await usersCollection.updateOne(filter,options);
+		const token = jwt.sign({email:email},process.env.SECRET_TOKEN);
+		res.send({result,token});
 	})
 	
 	
