@@ -20,6 +20,7 @@ const run=async()=>{
 	await client.connect();
 	const productsCollection=client.db('Silver_Hammer').collection('products');
 	const usersCollection=client.db('Silver_Hammer').collection('users');
+	const ordersCollection=client.db('Silver_Hammer').collection('orders');
 	app.get('/products',async(req, res)=>{
 		const result =await productsCollection.find().toArray();
 		res.send(result);
@@ -37,6 +38,17 @@ const run=async()=>{
 		const result=await usersCollection.updateOne(filter,options);
 		const token = jwt.sign({email:email},process.env.SECRET_TOKEN);
 		res.send({result,token});
+	})
+
+	app.post('/orders',async(req, res)=>{
+		const order=req.body
+		if(!order){
+			res.send({success:false, message:'Order failed,Please try again'})
+		}
+		else{
+			const result=await ordersCollection.insertOne(order)
+          res.send({success:true,message:'Order added Successfully'})
+		}
 	})
 	
 	
