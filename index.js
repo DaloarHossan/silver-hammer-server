@@ -50,6 +50,19 @@ const run=async()=>{
           res.send({success:true,message:'Order added Successfully'})
 		}
 	})
+
+	app.get('/orders/:email',async(req, res)=>{
+		const email=req.params.email;
+		const filter={email:email};
+		const result=await ordersCollection.find(filter).toArray();
+		if(result.length){
+			res.send(result)
+		}
+		else{
+			res.send({success:false,message:"You don't have order'"})
+		}
+
+	})
 	
 	
   } finally {
