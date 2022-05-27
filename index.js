@@ -11,6 +11,21 @@ app.use(express.json())
 
 app.get('/',(req,res)=>{res.send('Running')})
 
+const verifyJWT= async(req,res,next)=>{
+ const header=req.headers.authorization;
+ if (!header) {
+    return res.send({ message: 'UnAuthorized access' });
+  }
+  const token = header.split(' ')[1];
+  jwt.verify(token, process.env.SECRET_TOKEN, function (error, decoded) {
+    if (error) {
+      return res.send({ message: 'Forbidden access' })
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
+
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.j7629.mongodb.net/?retryWrites=true&w=majority`;
@@ -25,7 +40,7 @@ const run=async()=>{
 		const result =await productsCollection.find().toArray();
 		res.send(result);
 	})
-	app.get('/products/:id',async(req, res)=>{
+	app.get('/products/:id',verifyJWT, async(req, res)=>{
 		const id=req.params.id;
 		const query ={_id:ObjectId(id)}
 		const result = await productsCollection.findOne(query);
@@ -40,7 +55,7 @@ const run=async()=>{
 		res.send({result,token});
 	})
 
-	app.post('/orders',async(req, res)=>{
+	app.post('/orders',verifyJWT, async(req, res)=>{
 		const order=req.body
 		if(!order){
 			res.send({success:false, message:'Order failed,Please try again'})
@@ -51,7 +66,7 @@ const run=async()=>{
 		}
 	})
 
-	app.get('/orders/:email',async(req, res)=>{
+	app.get('/orders/:email',verifyJWT ,async(req, res)=>{
 		const email=req.params.email;
 		const filter={email:email};
 		const result=await ordersCollection.find(filter).toArray();
@@ -64,7 +79,7 @@ const run=async()=>{
 
 	})
 
-	app.delete('/orders/:id',async(req, res)=>{
+	app.delete('/orders/:id',verifyJWT, async(req, res)=>{
 		const id=req.params.id;
 		const query={_id:ObjectId(id)}
 		const result=await ordersCollection.deleteOne(query);
