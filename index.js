@@ -97,11 +97,14 @@ const run=async()=>{
 
 	app.post('/reviews', async(req, res)=>{
 		const review=req.body
-		const result=await reviewsCollection.insertOne(review)
 		if(!review){
 			res.send({success:false,message:"Review is not added"})
 		}
-		res.send({success:true,message:"Review is added successfully"})
+		else{
+			const result=await reviewsCollection.insertOne(review)
+			res.send({success:true,message:"Review is added successfully"})
+
+		}
 	})
 	app.get('/reviews', async(req, res)=>{
 		const result=await reviewsCollection.find().toArray()
