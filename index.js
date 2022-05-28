@@ -36,6 +36,7 @@ const run=async()=>{
 	const productsCollection=client.db('Silver_Hammer').collection('products');
 	const usersCollection=client.db('Silver_Hammer').collection('users');
 	const ordersCollection=client.db('Silver_Hammer').collection('orders');
+	const profileCollection=client.db('Silver_Hammer').collection('usersProfile');
 	const reviewsCollection=client.db('Silver_Hammer').collection('reviews');
 	app.get('/products',async(req, res)=>{
 		const result =await productsCollection.find().toArray();
@@ -110,7 +111,24 @@ const run=async()=>{
 		const result=await reviewsCollection.find().toArray()
 		res.send(result)
 	})
-	
+	app.post('/users',async(req, res)=>{
+		const profile=req.body;
+		if(profile){
+			const result=await profileCollection.insertOne(profile);
+            res.send({success:true,message:"Your profile has been updated",result})
+		}
+		else{
+			res.send({success:false,message:"Your profile has not been updated"})
+
+		}
+	})
+
+	app.get('/profile/:email',async(req, res) => {
+		const email = req.params.email;
+		const query = {email: email};
+		const result = await profileCollection.findOne(query)
+		res.send(result)
+	})
 
 	
   } finally {
