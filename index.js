@@ -36,6 +36,7 @@ const run=async()=>{
 	const productsCollection=client.db('Silver_Hammer').collection('products');
 	const usersCollection=client.db('Silver_Hammer').collection('users');
 	const ordersCollection=client.db('Silver_Hammer').collection('orders');
+	const reviewsCollection=client.db('Silver_Hammer').collection('reviews');
 	app.get('/products',async(req, res)=>{
 		const result =await productsCollection.find().toArray();
 		res.send(result);
@@ -78,14 +79,36 @@ const run=async()=>{
 		}
 
 	})
+	
 
+	app.get('/order/:id',verifyJWT, async(req, res)=>{
+		const id=req.params.id;
+		const query={_id:ObjectId(id)}
+		const result=await ordersCollection.findOne(query);
+		res.send(result)
+	})
 	app.delete('/orders/:id',verifyJWT, async(req, res)=>{
 		const id=req.params.id;
 		const query={_id:ObjectId(id)}
 		const result=await ordersCollection.deleteOne(query);
+		const order=await ordersCollection.findOne(query);
 		res.send({success:true,message:"Order has been deleted"})
 	})
+
+	app.post('/reviews', async(req, res)=>{
+		const review=req.body
+		const result=await reviewsCollection.insertOne(review)
+		if(!review){
+			res.send({success:false,message:"Review is not added"})
+		}
+		res.send({success:true,message:"Review is added successfully"})
+	})
+	app.get('/reviews', async(req, res)=>{
+		const result=await reviewsCollection.find().toArray()
+		res.send(result)
+	})
 	
+
 	
   } finally {
 	  
